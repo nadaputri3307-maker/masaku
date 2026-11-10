@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MASAKU - Smart Expiration Tracker</title>
+<style>
+:root{--green:#285943;--light:#e8f1e8;--cream:#f8f7f0;--text:#26382e;--muted:#78847b}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:var(--text)}
+header{background:var(--green);color:white;padding:22px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:27px;font-weight:bold;letter-spacing:2px}header span{font-size:13px;opacity:.85}
+.container{max-width:1100px;margin:30px auto;padding:0 20px}.welcome{margin-bottom:25px}
+.welcome h1{margin-bottom:7px;font-size:27px}.welcome p{color:var(--muted);line-height:1.6}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px}
+.stat,.panel{background:white;border-radius:13px;padding:20px;box-shadow:0 3px 12px #26382e0c}
+.stat p{color:var(--muted);margin:0 0 10px;font-size:13px}.stat h2{margin:0;font-size:28px;color:var(--green)}
+.panel{margin-bottom:22px}.panel h2{font-size:19px;margin-top:0}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{display:block;font-size:13px;margin-bottom:7px;font-weight:bold}
+input,select{width:100%;padding:12px;border:1px solid #dce4dc;border-radius:8px;background:white;font-size:14px}
+button{border:0;border-radius:8px;padding:11px 16px;cursor:pointer;font-weight:bold}button:hover{opacity:.85}
+.primary{background:var(--green);color:white}.secondary{background:var(--light);color:var(--green)}
+.danger{background:#fbe9e7;color:#a33d32}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.toolbar{display:flex;gap:10px;margin-bottom:15px}.toolbar input{flex:1}.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}th,td{padding:13px 10px;text-align:left;border-bottom:1px solid #edf0eb;font-size:13px}
+th{color:var(--muted)}.tag{display:inline-block;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:bold}
+.safe{background:#e5f3e7;color:#347344}.warning{background:#fff2d8;color:#a16b13}.expired{background:#fbe5e3;color:#a33d32}
+.empty{text-align:center;color:var(--muted);padding:25px}.small-btn{padding:7px 10px;font-size:11px}
+.notice{background:#eaf2e9;border-left:4px solid var(--green);border-radius:8px;padding:15px;margin-bottom:22px;font-size:13px;line-height:1.6}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:12px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.toolbar{flex-direction:column}header{padding:18px 20px}.welcome h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header><div class="logo">MASAKU.</div><span>Smart Expiration Date Tracker</span></header>
+<main class="container">
+<section class="welcome"><h1>Selamat Datang di MASAKU!</h1><p>Kelola produk, pantau masa berlaku, dan hindari barang kedaluwarsa.</p></section>
+<section class="stats">
+<div class="stat"><p>Total Produk</p><h2 id="total">0</h2></div>
+<div class="stat"><p>Masih Aman</p><h2 id="safeCount">0</h2></div>
+<div class="stat"><p>Segera Kedaluwarsa</p><h2 id="warningCount">0</h2></div>
+<div class="stat"><p>Sudah Kedaluwarsa</p><h2 id="expiredCount">0</h2></div>
+</section>
+<section class="notice"><strong>Informasi MASAKU</strong><br>Masukkan produk yang kamu miliki untuk memantau tanggal kedaluwarsanya. Produk dengan sisa masa berlaku 7 hari atau kurang akan ditandai sebagai segera kedaluwarsa.</section>
+<section class="panel" id="formPanel">
+<h2 id="formTitle">+ Tambah Produk</h2>
+<form id="productForm"><div class="form-grid">
+<div><label for="productName">Nama Produk</label><input id="productName" placeholder="Contoh: Susu UHT" required></div>
+<div><label for="category">Kategori Produk</label><select id="category" required><option value="">Pilih kategori</option><option>Makanan</option><option>Minuman</option><option>Skincare</option><option>Obat-obatan</option><option>Kebutuhan Rumah Tangga</option></select></div>
+<div><label for="quantity">Jumlah Produk</label><input id="quantity" type="number" min="1" placeholder="Contoh: 2" required></div>
+<div><label for="expiryDate">Tanggal Kedaluwarsa</label><input id="expiryDate" type="date" required></div>
+</div><div class="actions"><button class="primary" type="submit" id="submitBtn">Simpan Produk</button><button class="secondary" type="button" id="cancelBtn" hidden>Batal Edit</button></div></form>
+</section>
+<section class="panel"><h2>Daftar Produk</h2>
+<div class="toolbar"><input id="search" placeholder="Cari nama produk..."><select id="filter"><option value="all">Semua Status</option><option value="safe">Masih Aman</option><option value="warning">Segera Kedaluwarsa</option><option value="expired">Sudah Kedaluwarsa</option></select></div>
+<div class="table-wrap"><table><thead><tr><th>Nama Produk</th><th>Kategori</th><th>Jumlah</th><th>Tanggal Kedaluwarsa</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="productList"></tbody></table></div>
+<div id="emptyMessage" class="empty">Belum ada produk. Silakan tambahkan produk.</div>
+</section>
+</main>
+<footer>© 2026 MASAKU — Kelola Produk, Pantau Masa Berlaku.</footer>
+<script>
+let products=JSON.parse(localStorage.getItem("masakuProducts")||"[]"),editingId=null;
+const $=id=>document.getElementById(id);
+function getStatus(date){const today=new Date();today.setHours(0,0,0,0);const expiry=new Date(date+"T00:00:00");const days=Math.round((expiry-today)/86400000);if(days<0)return{key:"expired",label:"Kedaluwarsa"};if(days<=7)return{key:"warning",label:days===0?"Hari ini":days+" hari lagi"};return{key:"safe",label:"Masih aman"}}
+function saveData(){localStorage.setItem("masakuProducts",JSON.stringify(products))}
+function formatDate(date){return new Date(date+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})}
+function escapeHTML(value){return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]))}
+function render(){
+$("total").textContent=products.length;const statuses=products.map(p=>getStatus(p.expiryDate).key);
+$("safeCount").textContent=statuses.filter(s=>s==="safe").length;
+$("warningCount").textContent=statuses.filter(s=>s==="warning").length;
+$("expiredCount").textContent=statuses.filter(s=>s==="expired").length;
+const keyword=$("search").value.toLowerCase(),filter=$("filter").value;
+const filtered=products.filter(p=>p.name.toLowerCase().includes(keyword)&&(filter==="all"||filter===getStatus(p.expiryDate).key));
+$("productList").innerHTML=filtered.map(p=>{const status=getStatus(p.expiryDate);return `<tr><td><strong>${escapeHTML(p.name)}</strong></td><td>${escapeHTML(p.category)}</td><td>${p.quantity}</td><td>${formatDate(p.expiryDate)}</td><td><span class="tag ${status.key}">${status.label}</span></td><td><button class="secondary small-btn" onclick="editProduct('${p.id}')">Edit</button> <button class="danger small-btn" onclick="deleteProduct('${p.id}')">Hapus</button></td></tr>`}).join("");
+$("emptyMessage").style.display=filtered.length?"none":"block";
+}
+$("productForm").addEventListener("submit",function(e){e.preventDefault();const product={id:editingId||String(Date.now()),name:$("productName").value.trim(),category:$("category").value,quantity:Number($("quantity").value),expiryDate:$("expiryDate").value};if(!product.name||!product.category||!product.expiryDate||product.quantity<1)return;if(editingId)products=products.map(p=>p.id===editingId?product:p);else products.push(product);saveData();resetForm();render()});
+function editProduct(id){const p=products.find(item=>item.id===id);if(!p)return;editingId=id;$("productName").value=p.name;$("category").value=p.category;$("quantity").value=p.quantity;$("expiryDate").value=p.expiryDate;$("formTitle").textContent="Edit Produk";$("submitBtn").textContent="Simpan Perubahan";$("cancelBtn").hidden=false;$("formPanel").scrollIntoView({behavior:"smooth"})}
+function deleteProduct(id){if(!confirm("Apakah Anda yakin ingin menghapus produk ini?"))return;products=products.filter(p=>p.id!==id);saveData();render();if(editingId===id)resetForm()}
+function resetForm(){editingId=null;$("productForm").reset();$("formTitle").textContent="+ Tambah Produk";$("submitBtn").textContent="Simpan Produk";$("cancelBtn").hidden=true}
+$("cancelBtn").addEventListener("click",resetForm);$("search").addEventListener("input",render);$("filter").addEventListener("change",render);render();
+</script>
+</body>
+</html>
